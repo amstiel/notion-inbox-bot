@@ -1,49 +1,35 @@
-import { Client } from "@notionhq/client";
-import dotenv from "dotenv";
+import { Telegraf } from "telegraf";
+import { message } from "telegraf/filters";
 
-dotenv.config();
+import { telegramToken } from "./config";
+import { notionDb } from "./notion";
 
-const databaseId = process.env.NOTION_DATABASE_ID ?? "";
-const notion = new Client({
-    auth: process.env.NOTION_TOKEN,
+const bot = new Telegraf(telegramToken);
+
+bot.start(async (ctx) => {
+    ctx.reply(`👋 Привет! Я подключен к Notion DB: ${notionDb.databaseId}`);
 });
 
-async function addItem(text: string) {
+bot.help((ctx) => ctx.reply("Напиши что угодно, оно будет сохранено в Notion"));
+
+bot.on(message("text"), async (ctx) => {
     try {
-        const response = await notion.pages.create({
-            parent: { database_id: databaseId },
-            properties: {
-                title: {
-                    title: [
-                        {
-                            text: {
-                                content: text,
-                            },
-                        },
-                    ],
-                },
-            },
-        });
-        console.log(response);
-        console.log("Success! Entry added.");
+        await notionDb.addNote(ctx.message.text);
+        await ctx.telegram.sendMessage(
+            ctx.message.chat.id,
+            `✔️ Успешно сохранено в Notion`,
+            { reply_to_message_id: ctx.message.message_id }
+        );
     } catch (error) {
-        console.error(error);
+        await ctx.telegram.sendMessage(
+            ctx.message.chat.id,
+            `❌ Ошибка сохранения в Notion`,
+            { reply_to_message_id: ctx.message.message_id }
+        );
     }
-}
+});
 
-async function main() {
-    await addItem("Test message");
+bot.launch();
 
-    const response = await notion.databases.query({
-        database_id: process.env.NOTION_DATABASE_ID ?? "",
-    });
-
-    console.log("Got response:", response);
-}
-
-main()
-    .then(() => process.exit(0))
-    .catch((err) => {
-        console.error(err);
-        process.exit(1);
-    });
+process.once("SIGINT", () => bot.stop("SIGINT"));
+process.once("SIGTERM", () => bot.stop("SIGTERM"));
