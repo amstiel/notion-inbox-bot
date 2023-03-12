@@ -5,7 +5,12 @@
     "main": "dist/index.js",
     "private": true,
     "scripts": {
-        "start": "ts-node src/index.ts",
+        "restart": "pm2 restart ecosystem.config.js",
+        "start": "pm2 start ecosystem.config.js",
+        "stop": "pm2 stop ecosystem.config.js",
+        "monit": "pm2 monit",
+        "logs": "pm2 logs",
+        "dev": "ts-node src/index.ts",
         "typecheck": "tsc --noEmit",
         "build": "tsc",
         "format": "prettier --write src/**/*.ts"
@@ -15,6 +20,7 @@
     "license": "ISC",
     "devDependencies": {
         "@types/node": "^18.14.6",
+        "pm2": "^5.2.2",
         "prettier": "^2.8.4",
         "ts-node": "^10.9.1",
         "typescript": "^4.9.5"
