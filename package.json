@@ -16,7 +16,7 @@
         "format": "prettier --write src/**/*.ts"
     },
     "keywords": [],
-    "author": "",
+    "author": "Alexey Kunitsky",
     "license": "ISC",
     "devDependencies": {
         "@types/node": "^18.14.6",
@@ -29,5 +29,11 @@
         "@notionhq/client": "^2.2.3",
         "dotenv": "^16.0.3",
         "telegraf": "^4.12.2"
+    },
+    "engines": {
+        "node": "18.15.0"
+    },
+    "volta": {
+        "node": "18.15.0"
     }
 }
